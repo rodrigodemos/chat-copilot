@@ -44,24 +44,28 @@ export const ChatListSection: React.FC<IChatListSectionProps> = ({ header, conve
             {keys.map((id) => {
                 const convo = conversations[id];
                 const messages = convo.messages;
-                const lastMessage = messages[convo.messages.length - 1];
+                const lastMessage = messages.length > 0 ? messages[messages.length - 1] : undefined;
                 const isSelected = id === selectedId;
+                
+                let preview = 'Click to start the chat';
+                if (messages.length > 0 && lastMessage) {
+                    if (lastMessage.type === ChatMessageType.Document) {
+                        preview = 'Sent a file';
+                    } else if (lastMessage.type === ChatMessageType.Plan) {
+                        preview = 'Click to view proposed plan';
+                    } else {
+                        preview = lastMessage.content;
+                    }
+                }
+                
                 return (
                     <ChatListItem
                         id={id}
                         key={id}
                         isSelected={isSelected}
                         header={getFriendlyChatName(convo)}
-                        timestamp={convo.lastUpdatedTimestamp ?? lastMessage.timestamp}
-                        preview={
-                            messages.length > 0
-                                ? lastMessage.type === ChatMessageType.Document
-                                    ? 'Sent a file'
-                                    : lastMessage.type === ChatMessageType.Plan
-                                      ? 'Click to view proposed plan'
-                                      : lastMessage.content
-                                : 'Click to start the chat'
-                        }
+                        timestamp={convo.lastUpdatedTimestamp ?? lastMessage?.timestamp ?? Date.now()}
+                        preview={preview}
                         botProfilePicture={convo.botProfilePicture}
                     />
                 );

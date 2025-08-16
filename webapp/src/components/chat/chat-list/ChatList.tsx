@@ -103,7 +103,7 @@ export const ChatList: FC = () => {
     const dispatch = useAppDispatch();
 
     const sortConversations = (conversations: Conversations): ConversationsView => {
-        // sort conversations by last activity
+        // sort conversations by last activity (newest first)
         const sortedIds = Object.keys(conversations).sort((a, b) => {
             if (conversations[a].lastUpdatedTimestamp === undefined) {
                 return 1;
@@ -112,7 +112,7 @@ export const ChatList: FC = () => {
                 return -1;
             }
 
-            return conversations[a].lastUpdatedTimestamp - conversations[b].lastUpdatedTimestamp;
+            return conversations[b].lastUpdatedTimestamp - conversations[a].lastUpdatedTimestamp;
         });
 
         // Add conversations to sortedConversations in the order of sortedIds.

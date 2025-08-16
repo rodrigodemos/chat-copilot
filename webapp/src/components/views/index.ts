@@ -4,3 +4,5 @@ export * from './Error';
 export * from './Loading';
 export * from './Login';
 export * from './MissingEnvVariablesError';
+export * from './SimpleLandingPage';
+

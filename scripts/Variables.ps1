@@ -10,6 +10,7 @@ $varInstance = "https://login.microsoftonline.com"
 # Constants
 $varAzureOpenAI = "AzureOpenAI"
 $varOpenAI = "OpenAI"
+$varOllama = "Ollama"
 $varAzureAd = "AzureAd"
 $varNone = "None"
 $varScopes = "access_as_user"

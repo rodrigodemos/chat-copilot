@@ -12,7 +12,6 @@ import {
     addMessageToConversationFromUser,
     deleteConversation,
     setConversations,
-    setSelectedConversation,
     updateBotResponseStatus,
 } from '../../redux/features/conversations/conversationsSlice';
 import { Plugin } from '../../redux/features/plugins/PluginsState';
@@ -20,7 +19,7 @@ import { AuthHelper } from '../auth/AuthHelper';
 import { AlertType } from '../models/AlertType';
 import { ChatArchive } from '../models/ChatArchive';
 import { AuthorRoles, ChatMessageType, IChatMessage } from '../models/ChatMessage';
-import { IChatSession, ICreateChatSessionResponse } from '../models/ChatSession';
+import { IChatSession } from '../models/ChatSession';
 import { IChatUser } from '../models/ChatUser';
 import { TokenUsage } from '../models/TokenUsage';
 import { IAskVariables } from '../semantic-kernel/model/Ask';
@@ -77,34 +76,35 @@ export const useChat = () => {
         return users.find((user) => user.id === id);
     };
 
-    const createChat = async () => {
+    const createChat = async (): Promise<string | undefined> => {
         const chatTitle = `Copilot @ ${new Date().toLocaleString()}`;
         try {
-            await chatService
-                .createChatAsync(chatTitle, await AuthHelper.getSKaaSAccessToken(instance, inProgress))
-                .then((result: ICreateChatSessionResponse) => {
-                    const newChat: ChatState = {
-                        id: result.chatSession.id,
-                        title: result.chatSession.title,
-                        systemDescription: result.chatSession.systemDescription,
-                        memoryBalance: result.chatSession.memoryBalance,
-                        messages: [result.initialBotMessage],
-                        enabledHostedPlugins: result.chatSession.enabledPlugins,
-                        users: [loggedInUser],
-                        botProfilePicture: getBotProfilePicture(Object.keys(conversations).length),
-                        input: '',
-                        botResponseStatus: undefined,
-                        userDataLoaded: false,
-                        disabled: false,
-                        hidden: false,
-                    };
+            const result = await chatService
+                .createChatAsync(chatTitle, await AuthHelper.getSKaaSAccessToken(instance, inProgress));
+            
+            const newChat: ChatState = {
+                id: result.chatSession.id,
+                title: result.chatSession.title,
+                systemDescription: result.chatSession.systemDescription,
+                memoryBalance: result.chatSession.memoryBalance,
+                messages: [],
+                enabledHostedPlugins: result.chatSession.enabledPlugins,
+                users: [loggedInUser],
+                botProfilePicture: getBotProfilePicture(Object.keys(conversations).length),
+                lastUpdatedTimestamp: Date.now(),
+                input: '',
+                botResponseStatus: undefined,
+                userDataLoaded: false,
+                disabled: false,
+                hidden: false,
+            };
 
-                    dispatch(addConversation(newChat));
-                    return newChat.id;
-                });
+            dispatch(addConversation(newChat));
+            return newChat.id;
         } catch (e: any) {
             const errorMessage = `Unable to create new chat. Details: ${getErrorDetails(e)}`;
             dispatch(addAlert({ message: errorMessage, type: AlertType.Error }));
+            return undefined;
         }
     };
 
@@ -199,16 +199,18 @@ export const useChat = () => {
 
                 dispatch(setConversations(loadedConversations));
 
-                // If there are no non-hidden chats, create a new chat
+                // Don't auto-select any conversation to allow SimpleLandingPage to show
+                // Users can manually select a conversation or create a new one
                 const nonHiddenChats = Object.values(loadedConversations).filter((c) => !c.hidden);
                 if (nonHiddenChats.length === 0) {
-                    await createChat();
-                } else {
-                    dispatch(setSelectedConversation(nonHiddenChats[0].id));
+                    // Only create a chat if there are no existing non-hidden chats
+                    // This ensures new users get the simple landing page experience
+                    // await createChat(); // Commented out to show SimpleLandingPage instead
                 }
+                // Removed auto-selection: dispatch(setSelectedConversation(nonHiddenChats[0].id));
             } else {
-                // No chats exist, create first chat window
-                await createChat();
+                // No chats exist - don't create one automatically, let user create via SimpleLandingPage
+                // await createChat(); // Commented out to show SimpleLandingPage instead
             }
 
             return true;

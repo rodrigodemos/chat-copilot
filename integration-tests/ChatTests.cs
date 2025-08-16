@@ -26,6 +26,7 @@ public class ChatTests : ChatCopilotIntegrationTest
         var contentStream = await response.Content.ReadAsStreamAsync();
         var createChatResponse = await JsonSerializer.DeserializeAsync<CreateChatResponse>(contentStream, jsOpts);
         Assert.NotNull(createChatResponse);
+        Assert.NotNull(createChatResponse.ChatSession);
 
         // Ask something to the bot
         var ask = new Ask

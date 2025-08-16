@@ -87,6 +87,12 @@ elseif ($AIService -eq $varAzureOpenAI) {
         exit(1)
     }
 }
+elseif ($AIService -eq $varOllama) {
+    if (!$CompletionModel) {
+        Write-Error "No completion model provided"
+        exit(1)
+    }  
+}
 else {
     Write-Error "Please specify an AI service (AzureOpenAI or OpenAI) for -AIService."
     exit(1)
@@ -140,6 +146,15 @@ if ($AIService -eq $varOpenAI) {
         }
     };
 }
+elseif ($AIService -eq $varOllama) {
+    if ($LASTEXITCODE -ne 0) { exit(1) }
+    $AIServiceOverrides = @{
+        Ollama = @{
+            TextModel      = $CompletionModel;
+            EmbeddingModel = $EmbeddingModel;
+        }
+    };    
+}
 else {
     dotnet user-secrets set --project $webapiProjectPath KernelMemory:Services:AzureOpenAIText:APIKey $ApiKey
     if ($LASTEXITCODE -ne 0) { exit(1) }
@@ -167,7 +182,7 @@ $appsettingsOverrides = @{
             Scopes   = $varScopes
         }
     };
-    KernelMemory = @{
+    KernelMemory   = @{
         TextGeneratorType = $AIService;
         DataIngestion     = @{
             EmbeddingGeneratorTypes = @($AIService)
@@ -177,7 +192,7 @@ $appsettingsOverrides = @{
         };
         Services          = $AIServiceOverrides;
     };
-    Frontend = @{
+    Frontend       = @{
         AadClientId = $FrontendClientId
     };
 }

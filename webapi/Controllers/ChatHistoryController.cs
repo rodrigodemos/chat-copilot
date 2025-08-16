@@ -7,7 +7,6 @@ using CopilotChat.WebApi.Models.Request;
 using CopilotChat.WebApi.Models.Response;
 using CopilotChat.WebApi.Models.Storage;
 using CopilotChat.WebApi.Options;
-using CopilotChat.WebApi.Plugins.Utils;
 using CopilotChat.WebApi.Storage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -90,21 +89,12 @@ public class ChatHistoryController : ControllerBase
         var newChat = new ChatSession(chatParameters.Title, this._promptOptions.SystemDescription);
         await this._sessionRepository.CreateAsync(newChat);
 
-        // Create initial bot message
-        var chatMessage = CopilotChatMessage.CreateBotResponseMessage(
-            newChat.Id,
-            this._promptOptions.InitialBotMessage,
-            string.Empty, // The initial bot message doesn't need a prompt.
-            null,
-            TokenUtils.EmptyTokenUsages());
-        await this._messageRepository.CreateAsync(chatMessage);
-
         // Add the user to the chat session
         await this._participantRepository.CreateAsync(new ChatParticipant(this._authInfo.UserId, newChat.Id));
 
         this._logger.LogDebug("Created chat session with id {0}.", newChat.Id);
 
-        return this.CreatedAtRoute(GetChatRoute, new { chatId = newChat.Id }, new CreateChatResponse(newChat, chatMessage));
+        return this.CreatedAtRoute(GetChatRoute, new { chatId = newChat.Id }, new CreateChatResponse(newChat));
     }
 
     /// <summary>

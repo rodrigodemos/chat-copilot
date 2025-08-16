@@ -7,8 +7,7 @@ namespace CopilotChat.WebApi.Models.Response;
 
 /// <summary>
 /// Response object definition to the 'chats' POST request.
-/// This groups the initial bot message with the chat session
-/// to avoid making two requests.
+/// Contains the chat session information.
 /// </summary>
 public class CreateChatResponse
 {
@@ -18,15 +17,8 @@ public class CreateChatResponse
     [JsonPropertyName("chatSession")]
     public ChatSession ChatSession { get; set; }
 
-    /// <summary>
-    /// Initial bot message.
-    /// </summary>
-    [JsonPropertyName("initialBotMessage")]
-    public CopilotChatMessage InitialBotMessage { get; set; }
-
-    public CreateChatResponse(ChatSession chatSession, CopilotChatMessage initialBotMessage)
+    public CreateChatResponse(ChatSession chatSession)
     {
         this.ChatSession = chatSession;
-        this.InitialBotMessage = initialBotMessage;
     }
 }

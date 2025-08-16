@@ -10,6 +10,7 @@ using CopilotChat.WebApi.Storage;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using Microsoft.KernelMemory;
+using Microsoft.KernelMemory.AI.Ollama;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Plugins.Core;
 
@@ -224,6 +225,15 @@ internal static class SemanticKernelExtensions
                     {
                         AIService = ChatArchiveEmbeddingConfig.AIServiceType.OpenAI,
                         DeploymentOrModelId = openAIOptions.EmbeddingModel,
+                    };
+
+            case string x when x.Equals("Ollama", StringComparison.OrdinalIgnoreCase):
+                var OllamaOptions = memoryOptions.GetServiceConfig<OllamaConfig>(configuration, "Ollama");
+                return
+                    new ChatArchiveEmbeddingConfig
+                    {
+                        AIService = ChatArchiveEmbeddingConfig.AIServiceType.Ollama,
+                        DeploymentOrModelId = OllamaOptions.EmbeddingModel.ModelName,
                     };
 
             default:

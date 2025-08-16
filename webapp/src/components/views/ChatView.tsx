@@ -15,13 +15,17 @@ const useClasses = makeStyles({
     },
 });
 
-export const ChatView: FC = () => {
+interface ChatViewProps {
+    isChatListVisible?: boolean;
+}
+
+export const ChatView: FC<ChatViewProps> = ({ isChatListVisible = true }) => {
     const classes = useClasses();
     const { selectedId } = useAppSelector((state: RootState) => state.conversations);
 
     return (
         <div className={classes.container}>
-            <ChatList />
+            {isChatListVisible && <ChatList />}
             {selectedId !== '' && <ChatWindow />}
         </div>
     );

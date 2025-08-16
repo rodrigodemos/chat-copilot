@@ -23,7 +23,9 @@ public class ChatArchiveEmbeddingConfig
         /// <summary>
         /// OpenAI https://openai.com/
         /// </summary>
-        OpenAI
+        OpenAI,
+
+        Ollama
     }
 
     /// <summary>

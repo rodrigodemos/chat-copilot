@@ -3,6 +3,7 @@
 using Microsoft.Extensions.Options;
 using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel;
+using Microsoft.KernelMemory.AI.Ollama;
 
 namespace CopilotChat.WebApi.Services;
 
@@ -56,6 +57,17 @@ public sealed class SemanticKernelProvider
 #pragma warning restore CA2000
                 break;
 
+#pragma warning disable SKEXP0070
+            case string x when x.Equals("Ollama", StringComparison.OrdinalIgnoreCase):
+                var OllamaOptions = memoryOptions.GetServiceConfig<OllamaConfig>(configuration, "Ollama");
+                builder.AddOllamaChatCompletion(
+                    modelId: "llama3.1:latest",
+                    endpoint: new Uri("http://localhost:11434/"));
+                // OllamaOptions.Endpoint,
+                // OllamaOptions.APIKey,
+                // httpClient: httpClientFactory.CreateClient());
+                break;
+#pragma warning restore SKEXP0070
             default:
                 throw new ArgumentException($"Invalid {nameof(memoryOptions.TextGeneratorType)} value in 'KernelMemory' settings.");
         }
